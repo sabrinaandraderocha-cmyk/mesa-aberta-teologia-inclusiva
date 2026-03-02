@@ -136,6 +136,10 @@ def init_db():
         """)
         conn.commit()
 
+# CORREÇÃO: Chama a inicialização do banco diretamente aqui 
+# para garantir que rode no servidor do Render.
+init_db()
+
 def log_question(q: str):
     if not q:
         return
@@ -208,8 +212,6 @@ RESPOSTAS_DB = {
         delicate=True
     ),
 
-    # IMPORTANTÍSSIMO:
-    # Mantive a chave como você escreveu (com “–”) e o normalizador garante acesso mesmo se vier “-”.
     "E Romanos 1 (Rm 1:26–27)?": _make_answer(
         "Romanos 1 está dentro de uma crítica à idolatria e à degradação ética; não é um tratado sobre orientação sexual.",
         [
@@ -490,5 +492,5 @@ def api_answer():
     })
 
 if __name__ == "__main__":
-    init_db()
+    # Mantido aqui apenas para rodar localmente caso você teste no seu computador
     app.run(host="127.0.0.1", port=5000, debug=True)
