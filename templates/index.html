@@ -2,7 +2,8 @@
 {% block content %}
 
 <section class="grid">
-  <aside class="card">
+  <!-- COLUNA ESQUERDA -->
+  <aside class="card" id="perguntas-card">
     <h2>Pesquisar</h2>
     <form class="search" action="/" method="GET">
       <input type="text" name="q" placeholder="Ex: Sodoma, Romanos, trans..." value="{{ q }}">
@@ -12,14 +13,17 @@
     <hr style="border: 0; border-top: 1px solid var(--border); margin: 18px 0;">
 
     <h2>Selecione uma pergunta:</h2>
-    <div class="chips">
+
+    <div class="chips" id="perguntas">
       {% for qq in quick_questions %}
-        <a class="chip" href="/?selected={{ qq|urlencode }}">{{ qq }}</a>
+        <!-- IMPORTANTE: adiciona #resposta para cair direto no bloco da resposta -->
+        <a class="chip" href="/?selected={{ qq|urlencode }}#resposta">{{ qq }}</a>
       {% endfor %}
     </div>
   </aside>
 
-  <section class="card">
+  <!-- COLUNA DIREITA -->
+  <section class="card" id="resposta">
     <h2>Resposta</h2>
 
     {% if display_question %}
@@ -36,6 +40,7 @@
   </section>
 </section>
 
+<!-- AJUDA / RECURSOS -->
 <section class="resource-wrap">
   <h2 class="resource-title">Precisa de ajuda agora?</h2>
 
@@ -57,7 +62,11 @@
       <div class="btn-row">
         <a class="btn" href="{{ links_uteis['disque_100'] }}" target="_blank" rel="noopener">Disque 100</a>
         <a class="btn" href="{{ links_uteis['safernet_denuncie'] }}" target="_blank" rel="noopener">SaferNet</a>
-        <a class="btn" href="/?selected={{ 'Precisa de ajuda contra homofobia? (Denúncias e direitos)'|urlencode }}">Abrir orientações</a>
+
+        <!-- também aponta para #resposta -->
+        <a class="btn" href="/?selected={{ 'Precisa de ajuda contra homofobia? (Denúncias e direitos)'|urlencode }}#resposta">
+          Abrir orientações
+        </a>
       </div>
 
       <div class="hint">Dica: guarde provas (prints, links, nomes, datas, testemunhas).</div>
@@ -78,7 +87,9 @@
       </ul>
 
       <div class="btn-row">
-        <a class="btn" href="/?selected={{ 'Precisa de ajuda espiritual? (Igrejas inclusivas)'|urlencode }}">Abrir orientações</a>
+        <a class="btn" href="/?selected={{ 'Precisa de ajuda espiritual? (Igrejas inclusivas)'|urlencode }}#resposta">
+          Abrir orientações
+        </a>
       </div>
 
       <div class="hint">Sua fé não precisa ser vivida com medo.</div>
@@ -100,7 +111,11 @@
 
       <div class="btn-row">
         <a class="btn" href="{{ links_uteis['cvv'] }}" target="_blank" rel="noopener">CVV</a>
-        <a class="btn" href="/?selected={{ 'Precisa de ajuda psicológica agora? (CVV e clínicas-escola)'|urlencode }}">Abrir orientações</a>
+
+        <!-- também aponta para #resposta -->
+        <a class="btn" href="/?selected={{ 'Precisa de ajuda psicológica agora? (CVV e clínicas-escola)'|urlencode }}#resposta">
+          Abrir orientações
+        </a>
       </div>
 
       <div class="hint">Se houver risco imediato, procure emergência local e pessoas de confiança.</div>
