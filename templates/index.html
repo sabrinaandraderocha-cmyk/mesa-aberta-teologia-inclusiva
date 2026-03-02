@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block content %}
+
+<section class="grid">
+  <aside class="card">
+    <h2>Selecione uma pergunta:</h2>
+
+    <div class="chips">
+      {% for qq in quick_questions %}
+        <a class="chip" href="/?selected={{ qq|urlencode }}">{{ qq }}</a>
+      {% endfor %}
+    </div>
+  </aside>
+
+  <section class="card">
+    <h2>Resposta</h2>
+
+    {% if display_question %}
+      <div class="question-title">{{ display_question }}</div>
+    {% else %}
+      <div class="placeholder">
+        Selecione uma pergunta à esquerda.
+      </div>
+    {% endif %}
+
+    <div class="answer">
+      {{ answer_html|safe }}
+    </div>
+  </section>
+</section>
+
+<section class="resource-wrap">
+  <h2 class="resource-title">Precisa de ajuda agora?</h2>
+
+  <div class="resource-grid">
+    <div class="card resource-card">
+      <div class="resource-head">Ajuda contra homofobia</div>
+      <div class="resource-sub">Denúncias e direitos (Brasil)</div>
+
+      <p class="resource-text">
+        Se você sofreu discriminação, ameaça ou violência, priorize sua segurança, preserve evidências e busque os canais adequados.
+      </p>
+
+      <ul class="resource-list">
+        <li><strong>Risco imediato:</strong> 190.</li>
+        <li><strong>Disque 100 (Direitos Humanos):</strong> 24h, denúncia e protocolo.</li>
+        <li><strong>Internet (ameaças/discurso de ódio):</strong> SaferNet (denúncia anônima).</li>
+      </ul>
+
+      <div class="btn-row">
+        <a class="btn" href="{{ links_uteis['disque_100'] }}" target="_blank" rel="noopener">Disque 100</a>
+        <a class="btn" href="{{ links_uteis['safernet_denuncie'] }}" target="_blank" rel="noopener">SaferNet</a>
+        <a class="btn" href="/?selected={{ 'Precisa de ajuda contra homofobia? (Denúncias e direitos)'|urlencode }}">Abrir orientações</a>
+      </div>
+
+      <div class="hint">Dica: guarde provas (prints, links, nomes, datas, testemunhas).</div>
+    </div>
+
+    <div class="card resource-card">
+      <div class="resource-head">Ajuda espiritual</div>
+      <div class="resource-sub">Igrejas inclusivas e seguras</div>
+
+      <p class="resource-text">
+        A fé pode ser lugar de vida e pertencimento. Procure uma comunidade que acolha pessoas LGBTQIA+ com respeito e responsabilidade.
+      </p>
+
+      <ul class="resource-list">
+        <li>Procure comunidades <strong>inclusivas</strong> (afirmativas e seguras).</li>
+        <li>Evite espaços com coerção, “cura” ou “conversão”.</li>
+        <li>Pesquise: <em>igreja inclusiva + sua cidade</em>.</li>
+      </ul>
+
+      <div class="btn-row">
+        <a class="btn" href="/?selected={{ 'Precisa de ajuda espiritual? (Igrejas inclusivas)'|urlencode }}">Abrir orientações</a>
+      </div>
+
+      <div class="hint">Sua fé não precisa ser vivida com medo.</div>
+    </div>
+
+    <div class="card resource-card">
+      <div class="resource-head">Ajuda psicológica</div>
+      <div class="resource-sub">Crise emocional e cuidado contínuo</div>
+
+      <p class="resource-text">
+        Se você precisa conversar agora, peça ajuda. Sofrimento não precisa ser enfrentado sozinho(a).
+      </p>
+
+      <ul class="resource-list">
+        <li><strong>CVV:</strong> ligue 188 (24h, gratuito e sigiloso).</li>
+        <li>Para terapia acessível: procure <strong>clínicas-escola</strong> de Psicologia.</li>
+        <li>Pesquise: <em>clínica-escola psicologia + sua cidade</em>.</li>
+      </ul>
+
+      <div class="btn-row">
+        <a class="btn" href="{{ links_uteis['cvv'] }}" target="_blank" rel="noopener">CVV</a>
+        <a class="btn" href="/?selected={{ 'Precisa de ajuda psicológica agora? (CVV e clínicas-escola)'|urlencode }}">Abrir orientações</a>
+      </div>
+
+      <div class="hint">Se houver risco imediato, procure emergência local e pessoas de confiança.</div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
