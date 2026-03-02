@@ -35,6 +35,21 @@ LINKS_UTEIS = {
 def _html_escape(s: str) -> str:
     return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
+def _normalize_key(s: str) -> str:
+    """
+    Normaliza diferenças comuns de pontuação/traços que quebram busca de chave:
+    - en dash (–), em dash (—), minus (−) -> hyphen (-)
+    Também remove espaços extras.
+    """
+    if not s:
+        return ""
+    return (
+        s.replace("—", "-")
+         .replace("–", "-")
+         .replace("−", "-")
+         .strip()
+    )
+
 def _make_answer(title: str, bullets: list[str], refs: list[str] | None = None, delicate: bool = True) -> str:
     """
     Gera HTML de resposta com:
@@ -70,7 +85,10 @@ def _make_links_block(items: list[tuple[str, str]]) -> str:
     """
     Bloco HTML de links úteis (label, url).
     """
-    lis = "".join([f"<li><a href='{_html_escape(url)}' target='_blank' rel='noopener'>{_html_escape(label)}</a></li>" for label, url in items])
+    lis = "".join([
+        f"<li><a href='{_html_escape(url)}' target='_blank' rel='noopener'>{_html_escape(label)}</a></li>"
+        for label, url in items
+    ])
     return f"<div class='links-box'><strong>Links úteis:</strong><ul>{lis}</ul></div>"
 
 def fetch_verse_of_day() -> dict:
@@ -86,7 +104,6 @@ def fetch_verse_of_day() -> dict:
         req = urllib.request.Request(VERSE_OF_DAY_API, headers={"accept": "application/json"})
         with urllib.request.urlopen(req, timeout=4) as resp:
             data = json.loads(resp.read().decode("utf-8", errors="ignore"))
-        # Expected: data['verse']['details']['text'], data['verse']['details']['reference']
         details = (((data or {}).get("verse") or {}).get("details") or {})
         text = (details.get("text") or "").strip()
         reference = (details.get("reference") or "").strip()
@@ -95,8 +112,6 @@ def fetch_verse_of_day() -> dict:
         return fallback
     except Exception:
         return fallback
-
-
 
 @app.context_processor
 def inject_globals():
@@ -122,6 +137,8 @@ def init_db():
         conn.commit()
 
 def log_question(q: str):
+    if not q:
+        return
     with sqlite3.connect(DB_PATH) as conn:
         cur = conn.cursor()
         cur.execute(
@@ -163,7 +180,7 @@ RESPOSTAS_DB = {
             "Uma ética cristã centrada em Jesus avalia frutos: amor, justiça, misericórdia, cuidado e verdade (não medo e opressão).",
             "Você não precisa escolher entre fé e dignidade: Deus acolhe pessoas, não rótulos usados para excluir."
         ],
-        refs=["Atos 10:34–35", "Gálatas 3:28", "Mateus 7:16–20", "Mateus 22:37–40"],
+        refs=["Atos 10:34-35", "Gálatas 3:28", "Mateus 7:16-20", "Mateus 22:37-40"],
         delicate=True
     ),
 
@@ -175,7 +192,7 @@ RESPOSTAS_DB = {
             "Pergunta pastoral e ética: há consentimento, fidelidade, cuidado mútuo, justiça e ausência de violência?",
             "Leituras inclusivas se apoiam em método histórico-cultural e na centralidade do amor ao próximo como critério moral."
         ],
-        refs=["Mateus 22:37–40", "Gálatas 5:14", "1 Samuel 16:7"],
+        refs=["Mateus 22:37-40", "Gálatas 5:14", "1 Samuel 16:7"],
         delicate=False
     ),
 
@@ -187,19 +204,21 @@ RESPOSTAS_DB = {
             "Mesmo cristãos que citam Levítico costumam não aplicar literalmente outras regras do mesmo corpus; isso exige coerência hermenêutica.",
             "No Novo Testamento, a lei é lida à luz de Cristo e do amor que cumpre a lei (priorizando misericórdia e justiça)."
         ],
-        refs=["Levítico 18:22", "Levítico 20:13", "Marcos 7:18–23", "Gálatas 5:14"],
+        refs=["Levítico 18:22", "Levítico 20:13", "Marcos 7:18-23", "Gálatas 5:14"],
         delicate=True
     ),
 
+    # IMPORTANTÍSSIMO:
+    # Mantive a chave como você escreveu (com “–”) e o normalizador garante acesso mesmo se vier “-”.
     "E Romanos 1 (Rm 1:26–27)?": _make_answer(
         "Romanos 1 está dentro de uma crítica à idolatria e à degradação ética; não é um tratado sobre orientação sexual.",
         [
-            "O trecho aparece em um argumento sobre idolatria e suas consequências sociais (Rm 1:18–32).",
+            "O trecho aparece em um argumento sobre idolatria e suas consequências sociais (Rm 1:18-32).",
             "Leituras inclusivas entendem que Paulo descreve práticas de excesso e desordem ligadas ao contexto pagão do império (frequentemente marcadas por exploração e abuso).",
             "Paulo usa isso para preparar o ponto seguinte: ninguém deve se colocar como juiz do outro (Rm 2:1).",
             "Assim, o texto não autoriza condenar relações amorosas, fiéis e consentidas; o alvo é a injustiça e a ruptura ética que desumaniza."
         ],
-        refs=["Romanos 1:18–32", "Romanos 2:1", "Romanos 3:23–24"],
+        refs=["Romanos 1:18-32", "Romanos 2:1", "Romanos 3:23-24"],
         delicate=True
     ),
 
@@ -211,7 +230,7 @@ RESPOSTAS_DB = {
             "O contexto de Corinto envolve desigualdade, abuso e confusões morais; a lista de vícios aponta para injustiças que ferem o próximo.",
             "O movimento do texto é restaurativo: 'fostes lavados…' (dignidade e recomeço, não autorização para humilhar)."
         ],
-        refs=["1 Coríntios 6:9–11"],
+        refs=["1 Coríntios 6:9-11"],
         delicate=True
     ),
 
@@ -223,7 +242,7 @@ RESPOSTAS_DB = {
             "Pastoralmente: a carta visa proteger a comunidade de abusos, não criar categoria para excluir pessoas por orientação/identidade.",
             "O critério ético permanece: amor que não causa dano ao próximo."
         ],
-        refs=["1 Timóteo 1:8–11", "Romanos 13:10"],
+        refs=["1 Timóteo 1:8-11", "Romanos 13:10"],
         delicate=True
     ),
 
@@ -235,7 +254,7 @@ RESPOSTAS_DB = {
             "O texto funciona como alerta contra líderes e práticas que corrompem a comunidade e produzem dano.",
             "Pastoralmente: não use Judas como arma; use como chamado à responsabilidade e à proteção dos vulneráveis."
         ],
-        refs=["Judas 7", "Judas 8–16"],
+        refs=["Judas 7", "Judas 8-16"],
         delicate=True
     ),
 
@@ -247,7 +266,7 @@ RESPOSTAS_DB = {
             "Usar Sodoma para condenar pessoas LGBTQIA+ desloca o foco do texto e apaga a denúncia bíblica contra violência e opressão.",
             "Pastoralmente: Deus condena a violência e a exclusão; Deus acolhe quem é ferido por elas."
         ],
-        refs=["Gênesis 19", "Ezequiel 16:49–50", "Isaías 1:10–17"],
+        refs=["Gênesis 19", "Ezequiel 16:49-50", "Isaías 1:10-17"],
         delicate=True
     ),
 
@@ -259,7 +278,7 @@ RESPOSTAS_DB = {
             "Seu valor não depende do que líderes ou comunidades disseram para te controlar; depende do amor de Deus.",
             "Vocação cristã: viver verdade, amor e justiça - com integridade e cuidado."
         ],
-        refs=["Salmo 139:13–14", "Romanos 8:38–39", "Atos 10:34–35"],
+        refs=["Salmo 139:13-14", "Romanos 8:38-39", "Atos 10:34-35"],
         delicate=True
     ),
 
@@ -271,7 +290,7 @@ RESPOSTAS_DB = {
             "Pratique releitura: contexto histórico, tradução, gênero literário e centralidade de Jesus ajudam a curar interpretações violentas.",
             "Se houver risco de autoagressão, procure ajuda imediatamente com pessoas de confiança e serviços locais."
         ],
-        refs=["Mateus 11:28–30", "1 João 4:18", "Salmo 34:18"],
+        refs=["Mateus 11:28-30", "1 João 4:18", "Salmo 34:18"],
         delicate=True
     ),
 
@@ -283,7 +302,7 @@ RESPOSTAS_DB = {
             "Volte ao centro: Jesus julga frutos - misericórdia, justiça, acolhimento.",
             "Se a conversa não for segura, saia: sua saúde espiritual e emocional importa."
         ],
-        refs=["Mateus 7:16–20", "Mateus 22:37–40", "Efésios 4:15"],
+        refs=["Mateus 7:16-20", "Mateus 22:37-40", "Efésios 4:15"],
         delicate=True
     ),
 
@@ -296,7 +315,7 @@ RESPOSTAS_DB = {
             "Na internet (ameaças, discurso de ódio, exposição): você pode denunciar também pela SaferNet (anônimo) para encaminhamento às autoridades.",
             "No Brasil, o STF enquadrou homofobia e transfobia como crimes de racismo enquanto não houver lei específica - isso reforça a proteção jurídica."
         ],
-        refs=["Atos 10:34–35", "Provérbios 31:8–9"],
+        refs=["Atos 10:34-35", "Provérbios 31:8-9"],
         delicate=True
     ) + _make_links_block([
         ("Disque 100 - Denunciar violação de direitos humanos (GOV.BR)", LINKS_UTEIS["disque_100"]),
@@ -312,7 +331,7 @@ RESPOSTAS_DB = {
             "Dica prática: pesquise 'igreja inclusiva + sua cidade' e pergunte diretamente sobre acolhimento LGBTQIA+ e política de proteção contra discriminação.",
             "Se você sofreu abuso espiritual, considere acompanhamento pastoral inclusivo e terapia: fé também precisa de cuidado."
         ],
-        refs=["Mateus 11:28–30", "Isaías 42:3"],
+        refs=["Mateus 11:28-30", "Isaías 42:3"],
         delicate=True
     ),
 
@@ -338,7 +357,7 @@ RESPOSTAS_DB = {
             "Pastoralmente: comunidades cristãs não deveriam negar dignidade a ninguém.",
             "Isso sustenta uma teologia inclusiva que recusa discriminação contra pessoas LGBTQIA+."
         ],
-        refs=["Atos 10:34–35", "Tiago 2:1–9", "Gálatas 3:28"],
+        refs=["Atos 10:34-35", "Tiago 2:1-9", "Gálatas 3:28"],
         delicate=False
     ),
 }
@@ -363,29 +382,45 @@ def index():
     q = (request.args.get("q") or "").strip()
     selected = (request.args.get("selected") or "").strip()
 
+    selected_norm = _normalize_key(selected)
+    q_norm = _normalize_key(q)
+
     answer_html = ""
     display_question = ""
 
     if selected:
         display_question = selected
-        answer_html = RESPOSTAS_DB.get(selected, "")
-        if selected:
+        # Busca robusta: tenta original e normalizada
+        answer_html = RESPOSTAS_DB.get(selected) or RESPOSTAS_DB.get(selected_norm) or ""
+
+        if answer_html:
             log_question(selected)
+        else:
+            # Nunca quebrar em produção (Render)
+            answer_html = _make_answer(
+                "Resposta ainda não cadastrada",
+                [
+                    "Não encontrei uma resposta para esta pergunta no banco do app.",
+                    "Isso pode acontecer por diferenças de pontuação/traço no título.",
+                    "Se você me enviar o título exato que apareceu, eu cadastro a resposta no mesmo estilo."
+                ],
+                delicate=False
+            )
 
     elif q:
         candidates = []
-        q_lower = q.lower()
+        q_lower = q_norm.lower()
 
         # match por contém no título
         for k in RESPOSTAS_DB.keys():
-            if q_lower in k.lower():
+            if q_lower in _normalize_key(k).lower():
                 candidates.append(k)
 
         # fallback por palavras
         if not candidates:
             words = [w for w in q_lower.split() if len(w) >= 3]
             for k in RESPOSTAS_DB.keys():
-                kl = k.lower()
+                kl = _normalize_key(k).lower()
                 if any(w in kl for w in words):
                     candidates.append(k)
 
@@ -399,7 +434,6 @@ def index():
                 "Ainda não tenho uma resposta pronta para essa pergunta.",
                 [
                     "Escolha uma das perguntas rápidas ao lado.",
-                    "Ou pesquise por termos: 'Levítico', 'Romanos 1', 'Sodoma', '1 Coríntios 6', 'denúncia', 'CVV'.",
                     "Se você me enviar as perguntas que quer cobrir, eu monto novas respostas no mesmo estilo."
                 ],
                 delicate=False
@@ -423,14 +457,21 @@ def api_answer():
     if not question:
         return jsonify({"ok": False, "error": "question is required"}), 400
 
+    q_norm = _normalize_key(question)
+
+    # Busca robusta: tenta original e normalizada
     if question in RESPOSTAS_DB:
         log_question(question)
         return jsonify({"ok": True, "question": question, "answer_html": RESPOSTAS_DB[question]})
 
-    ql = question.lower()
+    if q_norm in RESPOSTAS_DB:
+        log_question(q_norm)
+        return jsonify({"ok": True, "question": q_norm, "answer_html": RESPOSTAS_DB[q_norm]})
+
+    ql = q_norm.lower()
     best = None
     for k in RESPOSTAS_DB.keys():
-        if ql in k.lower():
+        if ql in _normalize_key(k).lower():
             best = k
             break
 
@@ -443,7 +484,7 @@ def api_answer():
         "question": question,
         "answer_html": _make_answer(
             "Sem resposta exata encontrada.",
-            ["Tente uma pergunta rápida do menu ou pesquise por 'Levítico', 'Romanos 1', 'Sodoma', '1 Coríntios 6', 'denúncia', 'CVV'."],
+            ["Tente uma pergunta rápida do menu."],
             delicate=False
         )
     })
