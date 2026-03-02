@@ -7,9 +7,16 @@
   --shadow: 0 12px 28px rgba(0,0,0,0.08);
   --soft: #eef2f7;
   --soft2: #e6edf5;
+
+  /* extras */
+  --radius: 18px;
+  --radius-sm: 14px;
+  --tap: 44px;
 }
 
 *{ box-sizing: border-box; }
+
+html{ scroll-behavior: smooth; }
 
 body{
   margin:0;
@@ -20,6 +27,12 @@ body{
 
 a{ color: inherit; }
 
+/* melhora toque/scroll no mobile */
+button, a, input { -webkit-tap-highlight-color: transparent; }
+
+/* =========================================================
+   TOP BAR
+========================================================= */
 .rainbow-top{
   height: 6px;
   background: linear-gradient(90deg,#ff1744,#ff9100,#ffd600,#00e676,#00b0ff,#651fff,#d500f9);
@@ -44,11 +57,12 @@ a{ color: inherit; }
   gap: 12px;
 }
 
+/* LOGO maior já no desktop (opcional, mas fica mais “marca”) */
 .logo-img{
-  width: 64px;  
-  height: 64px; 
+  width: 92px;
+  height: 92px;
   object-fit: contain;
-  border-radius: 14px; 
+  border-radius: 16px;
   border: 1px solid var(--border);
   background: #fff;
   box-shadow: 0 4px 10px rgba(0,0,0,0.05);
@@ -77,13 +91,14 @@ a{ color: inherit; }
 .nav-link{
   display: inline-block;
   text-decoration: none;
-  padding: 8px 12px;
+  padding: 10px 12px;
   border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--soft);
   color: var(--text);
   font-size: 13px;
   transition: all 0.2s ease-in-out;
+  min-height: 40px;
 }
 
 .nav-link:hover{ background: var(--soft2); }
@@ -103,16 +118,16 @@ a{ color: inherit; }
     gap: 12px;
   }
 
-  /* LOGO AUMENTADO NO CELULAR */
+  /* LOGO BEM MAIOR NO CELULAR */
   .logo-img {
-    width: 150px !important; 
-    height: auto;
+    width: min(240px, 72vw) !important;
+    height: auto !important;
     margin-bottom: 4px;
+    border-radius: 22px;
   }
 
-  .appname {
-    font-size: 24px;
-  }
+  .appname { font-size: 24px; }
+  .tagline { font-size: 14px; }
 
   .nav {
     justify-content: center;
@@ -120,7 +135,9 @@ a{ color: inherit; }
   }
 }
 
-/* Container */
+/* =========================================================
+   CONTAINER + CARDS
+========================================================= */
 .container{
   max-width: 1120px;
   margin: 0 auto;
@@ -131,7 +148,7 @@ a{ color: inherit; }
 .card{
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 18px;
+  border-radius: var(--radius);
   box-shadow: var(--shadow);
   padding: 14px;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -142,14 +159,25 @@ a{ color: inherit; }
   box-shadow: 0 16px 32px rgba(0,0,0,0.12);
 }
 
+/* Para separar seções (Curiosidades vs Perguntas) */
+.section{
+  margin: 14px 0;
+}
+.section-title{
+  margin: 6px 2px 12px 2px;
+  font-size: 22px;
+  font-weight: 900;
+}
+
 /* =========================================================
-   VERSÍCULO DO DIA (Ampliado e Separado)
+   VERSÍCULO DO DIA
 ========================================================= */
 .verse-of-day {
-  margin: 10px 0 35px 0 !important; /* Buraco maior embaixo para separar */
+  margin: 10px 0 35px 0 !important;
   padding: 24px !important;
-  border-left: 5px solid #651fff; /* Detalhe roxo do arco-íris */
+  border-left: 5px solid #651fff;
   background: #ffffff;
+  border-radius: var(--radius);
 }
 
 .vod-title {
@@ -162,7 +190,7 @@ a{ color: inherit; }
 }
 
 .vod-text {
-  font-size: 1.25rem !important; /* Texto bem maior */
+  font-size: 1.25rem !important;
   font-style: italic;
   line-height: 1.5;
   margin-bottom: 12px;
@@ -170,12 +198,14 @@ a{ color: inherit; }
 }
 
 .vod-ref {
-  color: #651fff; /* Combinando com a borda */
+  color: #651fff;
   font-weight: bold;
   font-size: 14px;
 }
 
-/* Main grid */
+/* =========================================================
+   GRID PRINCIPAL
+========================================================= */
 .grid{
   display:grid;
   grid-template-columns: 420px 1fr;
@@ -198,11 +228,12 @@ a{ color: inherit; }
   flex: 1;
   border-radius: 12px;
   border: 1px solid var(--border);
-  padding: 12px 14px; /* Mais gordinho e fácil de clicar */
+  padding: 12px 14px;
   background: #fff;
   color: var(--text);
   font-size: 15px;
   transition: all 0.2s ease;
+  min-height: var(--tap);
 }
 
 .search input:focus {
@@ -215,17 +246,91 @@ a{ color: inherit; }
   border-radius: 12px;
   padding: 12px 16px;
   border: 1px solid var(--border);
-  background: var(--text); /* Botão de busca mais escuro */
+  background: var(--text);
   color: #fff;
-  font-weight: bold;
+  font-weight: 800;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
+  min-height: var(--tap);
 }
 
 .search button:hover{ background: #000; }
 
+@media (max-width: 520px){
+  .search{ flex-direction: column; }
+  .search button{ width: 100%; }
+}
+
 /* =========================================================
-   SANFONA DE PERGUNTAS (Accordion)
+   LISTA DE PERGUNTAS (IMPORTANTE!)
+   O seu print mostra links corridos. Aqui a gente força:
+   - 1 pergunta por linha
+   - “card” clicável
+   - nada de bloco de texto gigante
+
+   ✅ Se suas perguntas estiverem em outro container, troque
+   ".question-list" pelo seletor real.
+========================================================= */
+
+/* Use esta classe no container das perguntas, se puder */
+.question-list{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+/* Se você não consegue colocar classe no HTML:
+   tenta pegar pelo título “Selecione uma pergunta”
+   e estilizar links dentro do card.
+   (isso funciona em muitos layouts) */
+.card a{
+  word-break: break-word;
+}
+
+/* Estilo “card” para links de pergunta */
+.question-list a,
+.question-list button,
+.questions a,
+.questions button,
+.lista-perguntas a,
+.lista-perguntas button{
+  display: block;
+  width: 100%;
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--soft);
+  color: var(--text);
+  padding: 14px 16px;
+  font-size: 16px;
+  font-weight: 650;
+  line-height: 1.25;
+  min-height: var(--tap);
+  transition: background .2s ease, transform .05s ease, border-color .2s ease;
+}
+
+.question-list a:hover,
+.questions a:hover,
+.lista-perguntas a:hover{
+  background: var(--soft2);
+}
+
+.question-list a:active,
+.questions a:active,
+.lista-perguntas a:active{
+  transform: scale(0.99);
+}
+
+/* Remove aparência de “link sublinhado” se estiver vindo de algum estilo global */
+.question-list a,
+.questions a,
+.lista-perguntas a{
+  text-decoration: none !important;
+}
+
+/* =========================================================
+   SANFONA DE PERGUNTAS (Accordion) - seu modelo novo
 ========================================================= */
 .faq-container {
   display: flex;
@@ -236,7 +341,7 @@ a{ color: inherit; }
 
 .faq-item {
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: var(--radius-sm);
   overflow: hidden;
   background: #ffffff;
 }
@@ -246,31 +351,30 @@ a{ color: inherit; }
   text-align: left;
   background: var(--soft);
   border: none;
-  padding: 18px;
-  font-size: 15px;
-  font-weight: 600;
+  padding: 16px 16px;
+  font-size: 16px;
+  font-weight: 750;
   color: var(--text);
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
-  line-height: 1.4;
+  line-height: 1.25;
+  min-height: var(--tap);
 }
 
-.faq-question:hover {
-  background: var(--soft2);
-}
+.faq-question:hover { background: var(--soft2); }
 
-/* Quando a pergunta está aberta */
 .faq-item.active .faq-question {
   background: var(--text);
   color: #ffffff;
 }
 
 .faq-answer {
-  padding: 20px;
+  padding: 18px 16px;
   background: #ffffff;
   border-top: 1px solid var(--border);
-  animation: fadeIn 0.3s ease;
+  animation: fadeIn 0.25s ease;
+  scroll-margin-top: 110px; /* ajuda no scroll-into-view */
 }
 
 @keyframes fadeIn {
@@ -287,7 +391,8 @@ a{ color: inherit; }
 
 .answer, .faq-answer {
   color: var(--text);
-  line-height: 1.5;
+  line-height: 1.55;
+  font-size: 15px;
 }
 
 .answer ul, .faq-answer ul {
@@ -299,6 +404,7 @@ a{ color: inherit; }
   margin: 10px 0; 
 }
 
+/* caixas de alerta e links */
 .alert-box.warning{
   border-left: 4px solid #ffd600;
   padding: 12px 14px;
@@ -324,9 +430,28 @@ a{ color: inherit; }
 
 .links-box a{
   color: #00b0ff;
-  font-weight: 600;
+  font-weight: 700;
 }
 .links-box a:hover{ text-decoration: underline; }
+
+/* =========================================================
+   RESPOSTA (seção separada)
+   Dica: dê um id="resposta" no container da resposta.
+========================================================= */
+#resposta, .resposta, .answer{
+  scroll-margin-top: 110px;
+}
+
+.resposta-card{
+  margin-top: 14px;
+}
+
+.resposta-card h2,
+.resposta-title{
+  font-size: 22px;
+  font-weight: 900;
+  margin: 6px 0 12px 0;
+}
 
 /* =========================================================
    RECURSOS DE AJUDA
@@ -358,8 +483,9 @@ a{ color: inherit; }
   border-radius: 12px;
   border: 1px solid var(--border);
   background: var(--soft);
-  font-weight: 600;
+  font-weight: 700;
   transition: all 0.2s ease-in-out;
+  min-height: 40px;
 }
 .btn:hover{ background: var(--soft2); }
 .hint{ margin-top: 12px; color: var(--muted); font-size: 12px; }
@@ -385,3 +511,12 @@ a{ color: inherit; }
 .h3{ margin-top: 18px; font-size: 18px; font-weight: 900; }
 .bullets{ margin: 10px 0 0 0; padding-left: 18px; color: var(--text); font-size: 15px; line-height: 1.5;}
 .bullets li{ margin: 8px 0; }
+
+/* =========================================================
+   MOBILE POLISH
+========================================================= */
+@media (max-width: 480px){
+  .container{ padding: 0 12px 22px 12px; }
+  .card{ padding: 14px; border-radius: 18px; }
+  .section-title{ font-size: 20px; }
+}
