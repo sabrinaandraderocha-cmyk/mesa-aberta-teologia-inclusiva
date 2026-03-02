@@ -30,7 +30,6 @@
       <div class="vod-title">Versículo do dia</div>
       <div class="vod-text">“{{ (verse_of_day.text if verse_of_day is defined else '') }}”</div>
       <div class="vod-ref">{{ (verse_of_day.reference if verse_of_day is defined else '') }}</div>
-      
     </section>
 
     {% block content %}{% endblock %}
@@ -38,10 +37,16 @@
 
   <footer class="footer">
     <div class="footer-verse">{{ footer_verse }}</div>
+    
+    {% if disclaimer %}
+    <div style="font-size: 13px; margin: 12px 0; color: var(--muted); font-style: italic;">
+      {{ disclaimer }}
+    </div>
+    {% endif %}
+
     <div class="footer-actions">
       <a class="btn" href="{{ (footer_verse_url if footer_verse_url is defined else 'https://www.bibliaonline.com.br') }}" target="_blank" rel="noopener">Abrir Bíblia no versículo</a>
     </div>
-    
   </footer>
 
   <script src="{{ url_for('static', filename='app.js') }}"></script>
