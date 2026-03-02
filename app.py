@@ -19,6 +19,9 @@ FOOTER_VERSE = "Deus não faz acepção de pessoas. (Atos 10:34)"
 FOOTER_VERSE_URL = "https://www.bibliaonline.com.br/nvi/atos/10/34"
 VERSE_OF_DAY_API = "https://beta.ourmanna.com/api/v1/get?format=json&order=daily"
 
+# Adicionado o Disclaimer Global
+DISCLAIMER = "Esse app é cristão protestante, mas é contra qualquer tipo de intolerância religiosa."
+
 # =====================================================
 # LINKS ÚTEIS (BRASIL)
 # =====================================================
@@ -36,11 +39,6 @@ def _html_escape(s: str) -> str:
     return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
 
 def _normalize_key(s: str) -> str:
-    """
-    Normaliza diferenças comuns de pontuação/traços que quebram busca de chave:
-    - en dash (–), em dash (—), minus (−) -> hyphen (-)
-    Também remove espaços extras.
-    """
     if not s:
         return ""
     return (
@@ -51,13 +49,6 @@ def _normalize_key(s: str) -> str:
     )
 
 def _make_answer(title: str, bullets: list[str], refs: list[str] | None = None, delicate: bool = True) -> str:
-    """
-    Gera HTML de resposta com:
-    - título curto
-    - bullets diretos (tom pastoral + acadêmico)
-    - aviso de cuidado pastoral (quando delicado)
-    - referências bíblicas
-    """
     warn = ""
     if delicate:
         warn = """
@@ -82,9 +73,6 @@ def _make_answer(title: str, bullets: list[str], refs: list[str] | None = None, 
     """
 
 def _make_links_block(items: list[tuple[str, str]]) -> str:
-    """
-    Bloco HTML de links úteis (label, url).
-    """
     lis = "".join([
         f"<li><a href='{_html_escape(url)}' target='_blank' rel='noopener'>{_html_escape(label)}</a></li>"
         for label, url in items
@@ -92,7 +80,6 @@ def _make_links_block(items: list[tuple[str, str]]) -> str:
     return f"<div class='links-box'><strong>Links úteis:</strong><ul>{lis}</ul></div>"
 
 def fetch_verse_of_day() -> dict:
-    """Busca versículo do dia (internet). Se falhar, devolve fallback local."""
     fallback = {
         "text": "O Senhor é bom, uma fortaleza no dia da angústia; e conhece os que confiam nele.",
         "reference": "Naum 1:7",
@@ -115,10 +102,10 @@ def fetch_verse_of_day() -> dict:
 
 @app.context_processor
 def inject_globals():
-    # Garantir que o template base sempre receba essas variáveis
     return {
         "verse_of_day": fetch_verse_of_day(),
         "footer_verse_url": FOOTER_VERSE_URL,
+        "disclaimer": DISCLAIMER,
     }
 
 # =====================================================
@@ -136,8 +123,6 @@ def init_db():
         """)
         conn.commit()
 
-# CORREÇÃO: Chama a inicialização do banco diretamente aqui 
-# para garantir que rode no servidor do Render.
 init_db()
 
 def log_question(q: str):
@@ -155,6 +140,7 @@ def log_question(q: str):
 # LISTA DE PERGUNTAS (ORDEM DE EXIBIÇÃO)
 # =====================================================
 QUICK_QUESTIONS = [
+    # TEMAS PRINCIPAIS
     "É pecado ser homossexual?",
     "A Bíblia fala de orientação sexual como conhecemos hoje?",
     "E as passagens de Levítico (Lv 18:22; 20:13)?",
@@ -164,6 +150,18 @@ QUICK_QUESTIONS = [
     "E Judas 7 e 'carne estranha'?",
     "E a história de Sodoma (Gênesis 19) é sobre o quê?",
     "O que Deus pensa de mim, se eu sou LGBTQIA+?",
+    "A Bíblia fala sobre pessoas trans?",
+    "E Deuteronômio 22:5 sobre usar roupas do 'sexo oposto'?",
+    "Mudar o corpo (transição) é 'destruir o templo do Espírito'?",
+    "Deus errou ao criar uma pessoa trans?",
+    
+    # CURIOSIDADES BÍBLICAS (Novas adições!)
+    "🔍 Maria Madalena era prostituta?",
+    "🔍 A Lei de Talião ('olho por olho') era justiça literal?",
+    "🔍 Qual idioma Jesus falava?",
+    "🔍 Quem dividiu a Bíblia em capítulos e versículos?",
+
+    # AJUDA E ACOLHIMENTO
     "Como lidar com culpa e medo por causa da religião?",
     "Como responder com amor quando alguém usa a Bíblia para ferir?",
     "Precisa de ajuda contra homofobia? (Denúncias e direitos)",
@@ -176,6 +174,7 @@ QUICK_QUESTIONS = [
 # RESPOSTAS (TEOLOGIA INCLUSIVA: PASTORAL, DIRETA, ACADÊMICA)
 # =====================================================
 RESPOSTAS_DB = {
+    # --- RESPOSTAS ORIGINAIS ---
     "É pecado ser homossexual?": _make_answer(
         "Não: a Bíblia não condena 'ser' LGBTQIA+ como identidade/orientação.",
         [
@@ -284,15 +283,109 @@ RESPOSTAS_DB = {
         delicate=True
     ),
 
+    # --- RESPOSTAS SOBRE PESSOAS TRANS ---
+    "A Bíblia fala sobre pessoas trans?": _make_answer(
+        "A Bíblia não usa o conceito moderno de transgeneridade, mas possui fortes princípios de diversidade e acolhimento.",
+        [
+            "Gênesis descreve a criação em extremos (dia/noite, terra/mar, macho/fêmea). Assim como existe o crepúsculo e os pântanos, o ser humano também existe em um vasto e belo espectro biológico e identitário.",
+            "No mundo antigo, os 'eunucos' ocupavam um espaço fora do binarismo tradicional de gênero e, muitas vezes, eram marginalizados.",
+            "Deus, através do profeta Isaías, promete aos eunucos um lugar de honra no Seu templo, quebrando a exclusão religiosa da época.",
+            "Jesus reafirma esse acolhimento (Mateus 19), mostrando que o Reino de Deus tem espaço para corpos e vivências que fogem à norma da sociedade."
+        ],
+        refs=["Isaías 56:4-5", "Mateus 19:12", "Gálatas 3:28"],
+        delicate=True
+    ),
+
+    "E Deuteronômio 22:5 sobre usar roupas do 'sexo oposto'?": _make_answer(
+        "O texto trata de códigos de pureza ritual e separação da época, não de identidade de gênero.",
+        [
+            "As leis do Antigo Testamento frequentemente separavam coisas (tecidos, sementes, animais) para manter uma ordem ritual específica de Israel, diferenciando-os de nações vizinhas.",
+            "O vestuário da época era muito diferente do atual. Muitos estudiosos veem essa regra como uma proibição de disfarces para fraudes ou práticas de idolatria militar.",
+            "Aplicar uma lei de pureza ritual de milênios atrás para invalidar a vivência de pessoas trans hoje é um erro teológico e exegético."
+        ],
+        refs=["Deuteronômio 22:5", "Colossenses 2:16-17"],
+        delicate=False
+    ),
+
+    "Mudar o corpo (transição) é 'destruir o templo do Espírito'?": _make_answer(
+        "Modificar o corpo para cura, adequação e bem-estar não é destruí-lo, é cuidar da vida que Deus deu.",
+        [
+            "A medicina moderna nos permite tratar o sofrimento humano. Para pessoas trans, a transição é frequentemente um cuidado vital para tratar a disforia de gênero.",
+            "O alerta sobre o 'templo do Espírito' em 1 Coríntios 6 refere-se a não usar o corpo para explorar, violentar ou ferir o próximo (e a si mesmo) em práticas injustas.",
+            "Cuidar da sua saúde mental e física, alinhando seu corpo à sua identidade, é um ato de respeito e preservação da própria vida."
+        ],
+        refs=["1 Coríntios 6:19-20", "Efésios 5:29"],
+        delicate=True
+    ),
+
+    "Deus errou ao criar uma pessoa trans?": _make_answer(
+        "Deus não erra. A diversidade humana, incluindo a transgeneridade, reflete a vastidão criativa de Deus.",
+        [
+            "A biologia, a genética e a neurobiologia mostram que o desenvolvimento do sexo e do gênero é incrivelmente complexo.",
+            "Como dizem alguns teólogos inclusivos: 'Deus criou o trigo, mas nós fazemos o pão; Deus criou a uva, mas nós fazemos o vinho'.",
+            "Sua transgeneridade não é um defeito ou um castigo. É uma das muitas formas maravilhosas pelas quais a humanidade reflete a imagem divina."
+        ],
+        refs=["Salmo 139:13-16", "1 Samuel 16:7"],
+        delicate=True
+    ),
+
+    # --- CURIOSIDADES BÍBLICAS ---
+    "🔍 Maria Madalena era prostituta?": _make_answer(
+        "Não! A Bíblia nunca a chama de prostituta. Esse é um erro histórico.",
+        [
+            "Maria Madalena foi uma das seguidoras mais fiéis de Jesus, uma líder fundamental e a primeira testemunha da ressurreição.",
+            "A confusão começou no ano 591, quando o Papa Gregório I misturou, em um sermão, três mulheres diferentes: Maria Madalena, Maria de Betânia e a 'mulher pecadora' anônima que ungiu os pés de Jesus (Lucas 7).",
+            "Apenas em 1969 a Igreja Católica corrigiu oficialmente esse erro, separando as identidades dessas mulheres, mas a imagem popular da prostituta já havia se espalhado."
+        ],
+        refs=["Lucas 8:2", "João 20:11-18"],
+        delicate=False
+    ),
+
+    "🔍 A Lei de Talião ('olho por olho') era justiça literal?": _make_answer(
+        "Originalmente, foi um grande avanço jurídico civil e criminal para limitar a vingança, não para incentivá-la.",
+        [
+            "No direito antigo, a lei de talião garantia a proporcionalidade: a punição não poderia exceder o dano causado. Funcionava como uma diretriz para os juízes, muitas vezes resolvida com compensações financeiras justas.",
+            "Antes disso, no mundo antigo, uma ofensa pequena poderia gerar o extermínio de uma tribo ou família inteira por vingança desmedida.",
+            "Portanto, o 'olho por olho' era uma restrição legal humanitária para a época, impedindo punições exageradas.",
+            "No Novo Testamento, Jesus eleva esse princípio ético de justiça, propondo o perdão e a quebra do ciclo de retaliação."
+        ],
+        refs=["Êxodo 21:24", "Levítico 24:20", "Mateus 5:38-39"],
+        delicate=False
+    ),
+
+    "🔍 Qual idioma Jesus falava?": _make_answer(
+        "Jesus falava aramaico no seu dia a dia.",
+        [
+            "O aramaico era a língua comum e cotidiana da região da Galileia e Judeia no primeiro século.",
+            "O hebraico era usado principalmente na liturgia, para ler as Escrituras nas sinagogas (como Jesus faz em Lucas 4).",
+            "O grego era a língua comercial e oficial do Império Romano no Oriente. É provável que Jesus entendesse um pouco de grego para se comunicar com estrangeiros ou autoridades.",
+            "O Novo Testamento, no entanto, foi todo escrito em Grego Koiné para que a mensagem pudesse se espalhar por todo o império romano."
+        ],
+        refs=["Marcos 5:41", "Marcos 15:34"],
+        delicate=False
+    ),
+
+    "🔍 Quem dividiu a Bíblia em capítulos e versículos?": _make_answer(
+        "A Bíblia original não tinha capítulos, versículos, nem mesmo pontuação!",
+        [
+            "Os manuscritos originais foram escritos de forma contínua, sem separação de palavras em alguns casos (para economizar pergaminho).",
+            "A divisão em Capítulos foi feita pelo arcebispo Stephen Langton, por volta do ano 1227.",
+            "A divisão em Versículos foi feita pelo impressor francês Robert Estienne, em 1551 para o Novo Testamento, e 1555 para a Bíblia toda.",
+            "Essas divisões ajudam muito na localização dos textos, mas às vezes cortam o raciocínio de uma carta no meio da ideia. Por isso é sempre bom ler o contexto todo!"
+        ],
+        refs=[],
+        delicate=False
+    ),
+
+    # --- AJUDA ---
     "Como lidar com culpa e medo por causa da religião?": _make_answer(
         "Culpa e medo podem ser fruto de trauma religioso; o caminho cristão não é terror, é graça.",
         [
             "Repare nos frutos: se uma leitura gera desespero, auto-ódio e isolamento, isso precisa ser revisto à luz do evangelho.",
-            "Procure espaços seguros: comunidade inclusiva, pastoral acolhedora e/ou terapia afirmativa (sem “conversão”).",
-            "Pratique releitura: contexto histórico, tradução, gênero literário e centralidade de Jesus ajudam a curar interpretações violentas.",
+            "Procure espaços seguros: comunidade inclusiva, pastoral acolhedora e/ou terapia afirmativa.",
             "Se houver risco de autoagressão, procure ajuda imediatamente com pessoas de confiança e serviços locais."
         ],
-        refs=["Mateus 11:28-30", "1 João 4:18", "Salmo 34:18"],
+        refs=["Mateus 11:28-30", "1 João 4:18"],
         delicate=True
     ),
 
@@ -301,10 +394,9 @@ RESPOSTAS_DB = {
         [
             "Defina limites: 'Eu não aceito ser desumanizado(a) em nome da fé.'",
             "Traga contexto: muitas passagens tratam de violência e exploração; não de amor fiel e consentido.",
-            "Volte ao centro: Jesus julga frutos - misericórdia, justiça, acolhimento.",
             "Se a conversa não for segura, saia: sua saúde espiritual e emocional importa."
         ],
-        refs=["Mateus 7:16-20", "Mateus 22:37-40", "Efésios 4:15"],
+        refs=["Mateus 7:16-20", "Efésios 4:15"],
         delicate=True
     ),
 
@@ -312,26 +404,23 @@ RESPOSTAS_DB = {
         "Você tem direitos - e pode denunciar com segurança.",
         [
             "Se estiver em perigo imediato: ligue 190 (Polícia).",
-            "Você pode registrar Boletim de Ocorrência (presencial ou, em alguns estados, online). Se conseguir, guarde provas: prints, links, nomes, datas, testemunhas e laudos.",
-            "O Disque 100 (Direitos Humanos) funciona 24h, aceita denúncia anônima e gera protocolo de acompanhamento.",
-            "Na internet (ameaças, discurso de ódio, exposição): você pode denunciar também pela SaferNet (anônimo) para encaminhamento às autoridades.",
-            "No Brasil, o STF enquadrou homofobia e transfobia como crimes de racismo enquanto não houver lei específica - isso reforça a proteção jurídica."
+            "Você pode registrar Boletim de Ocorrência. Guarde provas: prints, links, nomes, datas, testemunhas e laudos.",
+            "O Disque 100 (Direitos Humanos) funciona 24h, aceita denúncia anônima.",
+            "No Brasil, o STF enquadrou homofobia e transfobia como crimes de racismo."
         ],
-        refs=["Atos 10:34-35", "Provérbios 31:8-9"],
+        refs=["Provérbios 31:8-9"],
         delicate=True
     ) + _make_links_block([
-        ("Disque 100 - Denunciar violação de direitos humanos (GOV.BR)", LINKS_UTEIS["disque_100"]),
-        ("Ouvidoria Nacional de Direitos Humanos (ONDH) - canais online/WhatsApp (GOV.BR)", LINKS_UTEIS["ondh"]),
-        ("SaferNet - Denúncias anônimas de violações de direitos na internet", LINKS_UTEIS["safernet_denuncie"]),
+        ("Disque 100 - Denunciar (GOV.BR)", LINKS_UTEIS["disque_100"]),
+        ("SaferNet - Denúncias de violações na internet", LINKS_UTEIS["safernet_denuncie"]),
     ]),
 
     "Precisa de ajuda espiritual? (Igrejas inclusivas)": _make_answer(
         "Busque um lugar seguro para a sua fé - sem medo, sem coerção, sem violência.",
         [
-            "Procure igrejas e comunidades cristãs inclusivas (afirmativas e seguras para pessoas LGBTQIA+).",
-            "Sinais de segurança: acolhimento explícito, linguagem respeitosa, liderança responsável, e ausência de 'terapias de conversão' ou promessas de 'cura'.",
-            "Dica prática: pesquise 'igreja inclusiva + sua cidade' e pergunte diretamente sobre acolhimento LGBTQIA+ e política de proteção contra discriminação.",
-            "Se você sofreu abuso espiritual, considere acompanhamento pastoral inclusivo e terapia: fé também precisa de cuidado."
+            "Procure igrejas e comunidades cristãs inclusivas.",
+            "Sinais de segurança: acolhimento explícito, linguagem respeitosa, e ausência de 'terapias de conversão'.",
+            "Se você sofreu abuso espiritual, considere acompanhamento pastoral inclusivo e terapia."
         ],
         refs=["Mateus 11:28-30", "Isaías 42:3"],
         delicate=True
@@ -340,10 +429,9 @@ RESPOSTAS_DB = {
     "Precisa de ajuda psicológica agora? (CVV e clínicas-escola)": _make_answer(
         "Se você precisa conversar agora, você não está sozinho(a).",
         [
-            "Em crise emocional, risco de autoagressão ou desespero: ligue 188 (CVV) - atendimento 24h, gratuito e sigiloso.",
-            "Se houver risco imediato à sua segurança: procure emergência local (SAMU/UPA/hospital) ou peça ajuda a alguém de confiança.",
-            "Para acompanhamento psicológico a baixo custo/gratuito: muitas faculdades com curso de Psicologia oferecem clínicas-escola (atendimento supervisionado).",
-            "Dica prática: pesquise 'clínica-escola de psicologia + sua cidade' ou 'serviço-escola psicologia + universidade'."
+            "Em crise emocional, risco de autoagressão: ligue 188 (CVV) - atendimento 24h, gratuito e sigiloso.",
+            "Se houver risco imediato à sua segurança: procure emergência local ou peça ajuda a alguém de confiança.",
+            "Muitas faculdades de Psicologia oferecem clínicas-escola com acompanhamento a baixo custo/gratuito."
         ],
         refs=["Salmo 34:18"],
         delicate=True
@@ -356,7 +444,6 @@ RESPOSTAS_DB = {
         [
             "Em Atos 10, a frase rompe barreiras religiosas e culturais: Deus acolhe quem era excluído.",
             "O critério não é marcador social, mas coração, fé, justiça e vida no Espírito.",
-            "Pastoralmente: comunidades cristãs não deveriam negar dignidade a ninguém.",
             "Isso sustenta uma teologia inclusiva que recusa discriminação contra pessoas LGBTQIA+."
         ],
         refs=["Atos 10:34-35", "Tiago 2:1-9", "Gálatas 3:28"],
@@ -392,13 +479,11 @@ def index():
 
     if selected:
         display_question = selected
-        # Busca robusta: tenta original e normalizada
         answer_html = RESPOSTAS_DB.get(selected) or RESPOSTAS_DB.get(selected_norm) or ""
 
         if answer_html:
             log_question(selected)
         else:
-            # Nunca quebrar em produção (Render)
             answer_html = _make_answer(
                 "Resposta ainda não cadastrada",
                 [
@@ -413,12 +498,10 @@ def index():
         candidates = []
         q_lower = q_norm.lower()
 
-        # match por contém no título
         for k in RESPOSTAS_DB.keys():
             if q_lower in _normalize_key(k).lower():
                 candidates.append(k)
 
-        # fallback por palavras
         if not candidates:
             words = [w for w in q_lower.split() if len(w) >= 3]
             for k in RESPOSTAS_DB.keys():
@@ -461,7 +544,6 @@ def api_answer():
 
     q_norm = _normalize_key(question)
 
-    # Busca robusta: tenta original e normalizada
     if question in RESPOSTAS_DB:
         log_question(question)
         return jsonify({"ok": True, "question": question, "answer_html": RESPOSTAS_DB[question]})
@@ -492,5 +574,4 @@ def api_answer():
     })
 
 if __name__ == "__main__":
-    # Mantido aqui apenas para rodar localmente caso você teste no seu computador
     app.run(host="127.0.0.1", port=5000, debug=True)
