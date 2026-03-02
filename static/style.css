@@ -520,3 +520,65 @@ button, a, input { -webkit-tap-highlight-color: transparent; }
   .card{ padding: 14px; border-radius: 18px; }
   .section-title{ font-size: 20px; }
 }
+/* =========================================================
+   FIX MOBILE: chips virando lista (não texto corrido)
+   Cole isso NO FINAL do arquivo CSS
+========================================================= */
+
+/* garante que o container vira coluna */
+aside.card .chips{
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  margin-top: 12px !important;
+}
+
+/* garante que cada link vira um "card" clicável */
+aside.card .chips a.chip{
+  display: block !important;
+  width: 100% !important;
+
+  text-decoration: none !important;
+  border: 1px solid var(--border) !important;
+  background: var(--soft) !important;
+
+  padding: 14px 16px !important;
+  border-radius: 14px !important;
+
+  color: var(--text) !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+
+  min-height: 44px !important;
+
+  /* evita quebrar feio ou virar “um parágrafo” */
+  white-space: normal !important;
+  word-break: break-word !important;
+  overflow-wrap: anywhere !important;
+
+  transition: background .2s ease, transform .05s ease !important;
+}
+
+aside.card .chips a.chip:hover{
+  background: var(--soft2) !important;
+}
+
+aside.card .chips a.chip:active{
+  transform: scale(0.99) !important;
+}
+
+/* =========================================================
+   FIX do "card" no celular (evita aparência bagunçada)
+========================================================= */
+@media (max-width: 520px){
+  .card{
+    padding: 14px !important;
+    border-radius: 18px !important;
+  }
+
+  /* evita que hr e títulos fiquem colados demais */
+  aside.card h2{
+    margin: 8px 0 10px 0 !important;
+  }
+}
