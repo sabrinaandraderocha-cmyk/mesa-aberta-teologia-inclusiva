@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import time
 from datetime import datetime
 
 from flask import Flask, render_template, request, jsonify
@@ -79,23 +80,43 @@ def _make_links_block(items: list[tuple[str, str]]) -> str:
     ])
     return f"<div class='links-box'><strong>Links úteis:</strong><ul>{lis}</ul></div>"
 
+# =====================================================
+# CACHE E BUSCA DO VERSÍCULO DO DIA
+# =====================================================
+# Cria um cache na memória para não travar o servidor a cada requisição
+_VERSE_CACHE = {"data": None, "last_fetch": 0}
+
 def fetch_verse_of_day() -> dict:
+    global _VERSE_CACHE
+    agora = time.time()
+    
+    # Se já pegou o versículo nas últimas 12 horas (43200 segundos), retorna o do cache
+    if _VERSE_CACHE["data"] and (agora - _VERSE_CACHE["last_fetch"] < 43200):
+        return _VERSE_CACHE["data"]
+
     fallback = {
         "text": "O Senhor é bom, uma fortaleza no dia da angústia; e conhece os que confiam nele.",
         "reference": "Naum 1:7",
         "source_url": "https://beta.ourmanna.com/"
     }
+    
     try:
         import urllib.request
         import json
         req = urllib.request.Request(VERSE_OF_DAY_API, headers={"accept": "application/json"})
-        with urllib.request.urlopen(req, timeout=4) as resp:
+        # Timeout reduzido para 2 segundos para evitar que o Gunicorn trave no Render
+        with urllib.request.urlopen(req, timeout=2) as resp:
             data = json.loads(resp.read().decode("utf-8", errors="ignore"))
+            
         details = (((data or {}).get("verse") or {}).get("details") or {})
         text = (details.get("text") or "").strip()
         reference = (details.get("reference") or "").strip()
+        
         if text and reference:
-            return {"text": text, "reference": reference, "source_url": "https://beta.ourmanna.com/api/v1/get"}
+            _VERSE_CACHE["data"] = {"text": text, "reference": reference, "source_url": "https://beta.ourmanna.com/api/v1/get"}
+            _VERSE_CACHE["last_fetch"] = agora
+            return _VERSE_CACHE["data"]
+            
         return fallback
     except Exception:
         return fallback
